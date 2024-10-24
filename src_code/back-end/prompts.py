@@ -1,6 +1,6 @@
 import json
 
-def system_prompt_team_generator():
+def create_system_prompt_team_generator():
     return '''You are an LLM agent designed to help users build a competitive Valorant team. Your task is to pick players one by one based on team requirements, constraints and user suggestions. After each player is selected, you will receive detailed information about the player and must dynamically adapt your strategy for the next player selection. Your strategy should evolve based on the selected players' roles, performance, and team synergy. Player requests must follow constraints for `required_role` and `competitive_level`, and the reasoning behind each choice must reflect the instructions given.
 
 ### Key Guidelines:
@@ -51,19 +51,11 @@ def system_prompt_team_generator():
 ```
 
 6. **Final Team Strength Summary**:
-- Once the team is complete (5 players), provide a comprehensive `team_strength` that reflects why each player was chosen based on the instructions and strategy. The summary should explain the balance of roles, agents, and synergies, tying each player choice to the overall team strategy:
-```json
-{
-"players": [
-// List of selected players in JSON format
-],
-"team_strength": "The team has strong agent diversity, with Controllers providing utility, Duelists adding offensive power, and a strong IGL to lead strategies. The team is balanced across regions and roles, ensuring both defensive and offensive capabilities."
-}
-```
+- Once the team is complete (5 players), provide a comprehensive "Team Strength Summary" that reflects why each player was chosen based on the instructions and strategy. The summary should explain the balance of roles, agents, and synergies, tying each player choice to the overall team strategy.
 '''
 
 
-def get_prompt_player_selection(task):
+def create_prompt_player_selection(task):
     return f'''You are an LLM agent tasked with selecting the best player for a Valorant team from a list of top 10 candidates provided by another agent. Your primary goal is to evaluate each player based on the request provided by the user and ensure that the selected player fits harmoniously within the current team. You must also address any specific requirements or explanations asked in the task provided to you.
 
 #### Key Guidelines:
@@ -103,8 +95,8 @@ def get_prompt_player_selection(task):
 - Example roles: "Entry Frag Specialist" for a Duelist, "Map Control Anchor" for a Sentinel.
 
 8. **Output**:
-- After selecting the player and assigning their role, output the following JSON:
-```json
+- After selecting the player and assigning their role, output the following JSON (always inside json tag \'''json {{your JSON}}\'''):
+"```json
 {{
 "selected_player": {{
 "player_handle": "Selected player's in-game username",
@@ -115,15 +107,15 @@ def get_prompt_player_selection(task):
 "reasoning": "Explain why this player was selected based on the request from user and how they contribute to the task's specific goals."
 }}
 }}
-```
+```"
 
 9. **Addressing the Task**:
 Task : {task}
 - Ensure that your reasoning explicitly addresses the task provided. For example, if the task asks "Why is this composition effective in a competitive match?", explain how the selected player fits within the current team and contributes to the task's goal.
 '''
 
-def get_final_prompt(instruction):
-    return f'''Now that the team has been fully formed with all 5 players selected, provide a detailed `team_strength` summary. This summary should address every aspect of the instructions provided throughout the selection process. Ensure that all requirements and priorities mentioned in the instructions are explained in depth, covering how each player and role choice contributes to the overall team strategy. The explanation should provide:
+def create_final_prompt(instruction):
+    return f'''Now that the team has been fully formed with all 5 players selected, provide a detailed "Team Strength Summary". This summary should address every aspect of the instructions provided throughout the selection process. Ensure that all requirements and priorities mentioned in the instructions are explained in depth, covering how each player and role choice contributes to the overall team strategy. The explanation should provide:
 
 - Deep reasoning for each player and role choice based on the instructions.
 - How the selected players fulfill the competitive requirements, performance metrics, and synergies.
@@ -132,8 +124,108 @@ def get_final_prompt(instruction):
 Instruction:
 {instruction}
 
-Make sure to provide a thorough breakdown that aligns with the instructions given, offering a complete rationale for the team's final composition and answer all explanations asked in the instructions in a detailed manner in the JSON under 'team_strength' key.'''
+Make sure to provide a thorough breakdown that aligns with the instructions given, offering a complete rationale for the team's final composition and answer all explanations asked in the instructions in a detailed manner. **The response should be styled with HTML tags**.'''
 
-def get_prompt_selection_state(current_team, player_request, player_options):
-    return "Current Team : " + json.dumps(current_team, indent=4) + '\n\n' + 'Player Request : ' + json.dumps(player_request, indent=4) + \
-            '\n\n' + "Player Options : " + '\n' + json.dumps(player_options)
+
+def create_prompt_selection_state(current_team, player_request, player_options):
+    return f'''Current Team : 
+{json.dumps(current_team, indent=4)}
+
+Player Request :
+{json.dumps(player_request, indent=4)}
+
+Player Options:
+{json.dumps(player_options)}
+'''
+
+
+def create_system_prompt_find_relevant_players():
+    return '''You are tasked with selecting players from a professional Valorant team based on a user query. The current team consists of 5 players, each represented as a JSON object containing detailed information such as performance statistics, roles, and in-game leadership capabilities. Your task is to analyze the query and return the relevant players who meet the criteria outlined in the query.
+
+### Input
+1. **Current Team (JSON)**: A list of 5 player objects.
+2. **User Query**: A specific question about the team or players (e.g., role, performance, IGL status, or justification of a player's inclusion).
+
+### Output
+Return a single JSON object with a `relevant_players` key containing a list of JSON objects, each with:
+- `player_handle`
+- `player_id`
+
+### Instructions:
+1. **Understand the Query**: Identify the specific player details required by the query (e.g., roles, IGL, performance).
+2. **Analyze the Team**: Match the players to the query criteria.
+3. **Return the Players**: Output a JSON object with the `relevant_players` list containing only `player_handle` and `player_id`.
+
+### Example Output:
+
+For the query: "Who is the IGL of the team?"
+```json
+{
+"relevant_players": [
+{ "player_handle": "kiNgg", "player_id": "106489999216559638" }
+]
+}
+```
+
+For the query: "Which players have the highest ACS?"
+```json
+{
+"relevant_players": [
+{ "player_handle": "Shyy", "player_id": "104589667756739104" },
+{ "player_handle": "Tacolilla", "player_id": "109874509283447213" }
+]
+}
+```
+
+For the query: "What recent performances justify the inclusion of *kiNgg*?"
+```json
+{
+"relevant_players": [
+{ "player_handle": "kiNgg", "player_id": "106489999216559638" }
+]
+}
+```
+
+Ensure that the response always contains only `relevant_players` with `player_handle` and `player_id`, regardless of the query type and is correct (always inside json tag \'''json {{your JSON}}\''').
+If the query is not relevant to any player in the current team respond with an empty map.
+'''
+
+def create_relevant_players_prompt(current_team, query):
+    return f'''
+User Query : {query}
+
+Current_team:
+{current_team}
+'''
+
+def create_system_prompt_query_responder():
+    return '''You are an expert agent tasked with answering questions about players based on detailed information. Use the available data to provide an organic and natural response, ensuring that it flows smoothly **without indicating that any data was provided to you**.
+
+**Your task:**
+1. **If the player list is not empty:**
+- Analyze the provided players using the relevant fields in each player's JSON object (e.g., roles, performance metrics, win percentages, ACS, IGL status, and more).
+- Use these details to answer the user's questions as accurately as possible, providing insights into how these players relate to the question.
+- Mention specific players, their strengths, and how they complement the team composition based on the question.
+- Include reasoning from the `selection_reasoning` field to enhance the answer when appropriate.
+
+2. **If the player list is empty:**
+- Use your own knowledge to answer the questions, incorporating general knowledge about Valorant players, strategies, and roles to provide a robust response.
+
+**Relevant JSON object fields:**
+- Player handle, roles, performance metrics (ACS, KD, IGL score, etc.), career stats, recent performance (last 15, 30, 60 games), and win rates.
+- Use details like `team_acronym`, `team_name`, `player_region`, `top_5_agents`, and the rationale behind player selection to improve the accuracy of your answer.
+
+**Remember:**
+- Always refer to specific data when available.
+- Provide detailed reasoning for your answers, particularly how players' stats or roles impact the team's success.
+- Adapt your answer based on the number of players provided.
+- Ensure that **your response is properly formatted in HTML format** for presentation.
+'''
+
+
+def create_prompt_query_responder(filtered_players_info, query):
+    return f'''Relevant Players:
+{filtered_players_info}
+
+Question: {query}
+'''

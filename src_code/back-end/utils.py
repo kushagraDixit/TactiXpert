@@ -13,8 +13,7 @@
 import re
 import json
 from decimal import Decimal
-from boto3.dynamodb.types import TypeSerializer
-
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 import re
 
 def replace_vct_game_changers(text):
@@ -47,16 +46,11 @@ def extract_json_from_response_with_comment_removal(response: str):
         # Remove comments (anything after //)
         json_str = re.sub(r'//.*', '', json_str)
         
-        try:
-            # Parse the cleaned JSON string
-            json_obj = json.loads(json_str)
-            return json_obj
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
-            return None
+        # Parse the cleaned JSON string
+        json_obj = json.loads(json_str)
+        return json_obj
     else:
-        print("No JSON found in the response.")
-        return None
+        raise ValueError("No JSON found in the response.")
     
 
 def decimal_default(obj):
@@ -94,9 +88,7 @@ def convert_dynamodb_map(dynamodb_map):
         return result
     return dynamodb_map
 
-import json
-from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from decimal import Decimal
+
 
 # Initialize the deserializer
 deserializer = TypeDeserializer()
@@ -185,3 +177,30 @@ def transform_document(initial_doc):
     }
 
     return final_doc
+
+
+def remove_newlines_and_tabs(json_string):
+    # Remove all \n (newlines) and \t (tabs) from the string
+    return json_string.replace('\n', '').replace('\t', '')
+
+def extract_json_for_final_response(json_string):
+    # Remove the triple backticks and unnecessary characters
+    json_pattern = r'```json\s*(\{.*?\})\s*```'
+    
+    # Find the JSON substring using the pattern
+    match = re.search(json_pattern, json_string, re.DOTALL)
+
+    if match:
+            json_str = match.group(1)
+    
+            # Escape special characters in the cleaned string
+            cleaned_string = remove_newlines_and_tabs(json_str)
+            
+            # Parse the cleaned string into a Python dictionary
+            print(repr(cleaned_string))
+            try:
+                json_data = json.loads(cleaned_string)
+                return json_data
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON: {e}")
+                return None

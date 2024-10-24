@@ -2,19 +2,20 @@ import React, { useState } from 'react';
 import './PlayerCard.css';
 
 const PlayerCard = (props) => {
-    console.log('Props received by PlayerCard:', props); // Log props to check values
+    // console.log('Props received by PlayerCard:', props); // Log props to check values
     const { player, agentImage, requestReasoning, playerReasoning } = props;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const fullName = `${player.player_info.first_name} ${player.player_info.last_name}`;
   const mainRoles = player.main_roles.join(', ');
   const topAgents = player.top_5_agents.slice(0, 3).join(', ');
+  const isIGL = player.is_igl
 
   const formatNumber = (num) => num.toFixed(2);
 
 
-  console.log('requestReasoning inside PlayerCard:', requestReasoning);
-  console.log('playerReasoning inside PlayerCard:', playerReasoning);
+  // console.log('requestReasoning inside PlayerCard:', requestReasoning);
+  // console.log('playerReasoning inside PlayerCard:', playerReasoning);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -31,6 +32,9 @@ const PlayerCard = (props) => {
         <div className="right-section">
           <h2 className="player-handle">{player.player_handle}</h2>
           <p className="player-tagline">{player.assigned_part}</p>
+
+          {/* Display the IGL tag if the player is an IGL */}
+          {isIGL && <p className="igl-tagline"><strong>(In-Game Leader)</strong></p>}
 
           <div className="divider"></div>
 

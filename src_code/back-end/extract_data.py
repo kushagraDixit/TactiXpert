@@ -57,3 +57,25 @@ def get_player_options(player_request):
     
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+def get_relevant_team_objects(relevant_players, current_team, current_team_store):
+    # Create a set of player_ids from relevant_players for quick lookup
+    relevant_player_ids = {player['player_id'] for player in relevant_players}
+
+    # Create a dictionary from current_team mapping player_id to their reasoning
+    player_reasoning_map = {player['player_id']: player.get('reasoning', '') for player in current_team}
+
+    # Filter current_team_store based on relevant_player_ids and add reasoning
+    filtered_team_store = []
+    for player in current_team_store:
+        player_id = player['player_id']
+        if player_id in relevant_player_ids:
+            # Add reasoning from current_team if exists
+            if player_id in player_reasoning_map:
+                player['reasoning'] = player_reasoning_map[player_id]
+            else:
+                player['reasoning'] = 'No reasoning provided'  # Fallback if reasoning not found
+            filtered_team_store.append(player)
+
+    return filtered_team_store

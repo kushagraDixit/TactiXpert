@@ -2,11 +2,10 @@
 
 .player-card {
     display: flex;
-    width: 80%;
     background: linear-gradient(135deg, #f0f0f0, #f9f9f9);
     border-radius: 15px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    margin: 20px;
+    margin: 15px;
     font-family: 'Poppins', sans-serif;
     font-size: 10;
     transition: transform 0.2s ease;
@@ -31,6 +30,7 @@
     object-fit: cover;  /* Cover the container, cropping the image if necessary */
     /* You can also use 'contain' to ensure the whole image fits within the container without cropping */
     border-radius: 10px;  /* Optional: round the corners of the image */
+    margin-top: 50px;
   }
   
 .right-section {
