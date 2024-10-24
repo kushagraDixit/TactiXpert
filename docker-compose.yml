@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"  # Flask backend
+      - "3000:3000"  # React frontend
+    volumes:
+      - .:/app
+    command: ["npm start"]
+    working_dir: /app/src_code/front-end/chat_interface  # Set the working directory to front-end for npm

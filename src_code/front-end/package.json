@@ -1,12 +1,13 @@
 {
-  "name": "front-end",
+  "name": "frontend",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-scripts start",
+    "start-flask": "cd ../back-end flask run",
+    "dev": "concurrently \"cd ./chat-interface/ && npm run start\" \"npm run start-flask\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "concurrently": "^6.0.0",  
+    "react-scripts": "4.0.3"   
+  }
 }
