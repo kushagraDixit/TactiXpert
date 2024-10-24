@@ -44,12 +44,12 @@ def request_team():
         team_info =         body.get('current_team', None)
         team_full_info =    body.get('team_store', None)
 
-        if request_str in cache:
-            return jsonify(cache[request_str]), 200
+        # if request_str in cache:
+        #     return jsonify(cache[request_str]), 200
 
         if request_type=='team_generation':
             final_team_combined, current_team, team_store, request_calls = generate_team(request_str)
-            cache[request_str] = {'Response': {'response_type' : request_type, 'final_team_combined' : final_team_combined, 'current_team' : current_team, 'team_store' : team_store, 'request_calls' : request_calls}}
+            # cache[request_str] = {'Response': {'response_type' : request_type, 'final_team_combined' : final_team_combined, 'current_team' : current_team, 'team_store' : team_store, 'request_calls' : request_calls}}
             print("===============================Request End===================================")
             return jsonify({'Response': {'response_type' : request_type, 'final_team_combined' : final_team_combined, 'current_team' : current_team, 'team_store' : team_store, 'request_calls' : request_calls}}), 200
         if request_type=='other_request_type':
