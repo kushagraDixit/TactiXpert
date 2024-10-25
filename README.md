@@ -16,7 +16,7 @@ This project requires **Miniconda** and **Node.js** to be installed on your syst
 Navigate to the backend source directory and create the conda environment:
 
 ```bash
-cd src_code/back-end
+cd TactiXpert/src_code/back-end
 conda env create --name vct_hack --file=environment.yml
 ```
 
@@ -36,7 +36,7 @@ The Flask server will start on **port 5000**.
 Open a new Terminal and Navigate to the directory and install the required dependencies:
 
 ```bash
-cd ../front-end/chat-interface
+cd TactiXpert/src_code/front-end/chat-interface
 npm install
 ```
 
