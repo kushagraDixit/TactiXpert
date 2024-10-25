@@ -33,7 +33,7 @@ The Flask server will start on **port 5000**.
 
 ### Step 2: Set up the Front-End
 
-Navigate to the frontend directory and install the required dependencies:
+Open a new Terminal and Navigate to the directory and install the required dependencies:
 
 ```bash
 cd ../front-end/chat-interface
