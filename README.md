@@ -1,4 +1,3 @@
-```markdown
 # Project Setup and Usage Guide
 
 This project requires **Miniconda** and **Node.js** to be installed on your system.
@@ -56,4 +55,3 @@ The React app server will start on **port 3000**.
 Once both servers are running, you can access the chat interface at `http://localhost:3000`.
 
 Enjoy using the chat interface for your project!
-```
