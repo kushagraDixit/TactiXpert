@@ -10,7 +10,6 @@ import json
 def get_selected_player(input_map, player_request, task):
     
     system_prompt_player_selector = create_prompt_player_selection(task)
-    # player_selector = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_prompt_player_selector)
     player_selector = BedrockLLM(system_instruction=system_prompt_player_selector)
 
     current_state_for_selection = create_prompt_selection_state(input_map['current_team'], player_request, input_map['player_options'])
@@ -29,7 +28,6 @@ def generate_team(request):
     try:
         # Initialize the model
         system_instruction = create_system_prompt_team_generator()
-        # team_planner = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_instruction)
         team_planner = BedrockLLM(system_instruction=system_instruction)
         request_calls = []
         current_team = []
