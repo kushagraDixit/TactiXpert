@@ -1,3 +1,5 @@
+# The public version of the project is available to try at : [Project Link](http://35.93.137.150:3000/)
+
 # Project Setup and Usage Guide
 
 This project requires **Miniconda** and **Node.js** to be installed on your system.
