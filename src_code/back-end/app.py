@@ -17,18 +17,7 @@ cache = {}
 def health_check():
     return jsonify({'status': 'App is running!'}), 200
 
-# Endpoint 2: Add two numbers passed as query parameters
-@app.route('/add', methods=['GET'])
-def add_numbers():
-    try:
-        num1 = float(request.args.get('num1'))
-        num2 = float(request.args.get('num2'))
-        result = num1 + num2
-        return jsonify({'result': result}), 200
-    except (TypeError, ValueError):
-        return jsonify({'error': 'Invalid input! Please provide two numbers.'}), 400
-
-# Endpoint 2: Add two numbers passed as query parameters
+# Endpoint 2: Build Valorant team and answer user queries
 @app.route('/request_team', methods=['POST'])
 def request_team():
     try:

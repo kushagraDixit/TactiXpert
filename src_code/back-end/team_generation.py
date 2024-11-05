@@ -11,14 +11,12 @@ import json
 def get_selected_player(input_map, player_request, task):
     
     system_prompt_player_selector = create_prompt_player_selection(task)
+
     player_selector = BedrockLLM(system_instruction=system_prompt_player_selector)
 
     current_state_for_selection = create_prompt_selection_state(input_map['current_team'], player_request, input_map['player_options'])
 
-    #print('SELECTION STATE PROPT : ', current_state_for_selection)
-
     selected_player = player_selector.call(current_state_for_selection)
-    #print("Selected Player: ", selected_player)
 
     selected_player = extract_json_from_response_with_comment_removal(str(selected_player))
 
@@ -40,8 +38,6 @@ def generate_team(request):
 
         request = "Instructions: " + '\n' + request
 
-        #print(f"Final Request : {request}")
-
         for i in range(5):
             retries = 3  # Number of retries per iteration
             success = False
@@ -51,7 +47,6 @@ def generate_team(request):
                     # Call the model with the request
                     print(f"******At iteration {i+1} : Current Team has {len(current_team)} players")
                     result = team_planner.call(request)
-                    #print(f"Player Request {i+1} String: \n{result}\n")
                     player_request = None
                     player_request = extract_json_from_response_with_comment_removal(str(result))
                     request_calls.append(player_request)
@@ -67,10 +62,6 @@ def generate_team(request):
                         'current_team': current_team,
                         'player_options': [transform_document(player) for player in player_options]
                     }
-
-                    # print("-------------------------------------------------------------------------------------------")
-                    # print(json.dumps(player_options[0], indent = 4))
-                    # print("-------------------------------------------------------------------------------------------")
 
                     # Get selected player
                     player_selected = get_selected_player(player_options_input, player_request, instruction)
@@ -129,13 +120,8 @@ def generate_team(request):
         while not success and retries > 0:
             try:            
                 final_prompt = request + '\n' + create_final_prompt(instruction)
-                # print("***********************FINAL PROMPT INPUT***************************")
-                # print(final_prompt)
-                # print('********************************************************************')
                 result = team_planner.call(final_prompt)
-                # final_team_combined = extract_json_from_response_with_comment_removal(str(result))
                 final_strength_summary = str(result)
-                # print(final_strength_summary)
                 final_team_combined = {'team_strength' : final_strength_summary}
                 success = True
             except Exception as e:
@@ -145,8 +131,6 @@ def generate_team(request):
 
         for i, call in enumerate(request_calls):
             call['selected_player'] = current_team[i]['player_id']
-        #print("Current Team: ", current_team)
-        # print(str(result))
 
         # Return the final result after successful iterations
         return final_team_combined, current_team, current_team_store, request_calls
@@ -155,6 +139,7 @@ def generate_team(request):
         # Print the error message and the traceback for debugging
         error_message = f"An error occurred: {str(e)}"
         traceback.print_exc()  # This will print the full traceback for debugging
+        print("Error: ", error_message)
         return "Error Encountered During your query. Please Enter your Query Again!"
 
 def replace_player_in_current_team(current_team, selected_player_info, player_to_be_replaced):
@@ -188,8 +173,6 @@ def get_replacement_players(players_to_be_replaced, replacement_request_calls, q
                 prompt_replacement_selector = create_prompt_replacement_selector(player_options_input, player_request, player)
 
                 selected_replacement = replacement_selector.call(prompt_replacement_selector)
-
-                # print("Response for replacement : \n", selected_replacement)
 
                 selected_replacement = extract_json_from_response_with_comment_removal(str(selected_replacement))
 
@@ -239,12 +222,10 @@ def get_question_response(request, current_team, current_team_store, request_cal
             relevent_players_prompt = create_relevant_players_prompt(json.dumps(current_team, indent=4), query)
 
             relevant_players_response = relevent_players_finder.call(prompt=relevent_players_prompt)
-            print("relevant_players_response: ", relevant_players_response)
 
             relevant_players = extract_json_from_response_with_comment_removal(str(relevant_players_response))
             match_history_required = relevant_players['match_history_required']
 
-            #print("Relevant players: ",relevant_players['relevant_players'])
             print("Match history required: ",match_history_required)
 
             if len(relevant_players['relevant_players'])>0:
@@ -255,28 +236,18 @@ def get_question_response(request, current_team, current_team_store, request_cal
                 if match_history_required:
                     relevant_players_info = get_match_history_for_players(relevant_players_info)
 
-                #print(f"relevant_players_info  : {relevant_players_info}")
-                #print("Request Calls : ", request_calls)
                 replacement_required, players_to_be_replaced, replacement_request_calls = is_replacement_player_required(relevant_players['relevant_players'], request_calls)
 
                 if replacement_required:
                     replacement_players = get_replacement_players(players_to_be_replaced, replacement_request_calls, query, current_team)
-
-            # print("Replacement Players : ", replacement_players)
             
             system_prompt_query_responder = create_system_prompt_query_responder(replacement_required)
-
-            # print(f"system_prompt_query_responder : \n{system_prompt_query_responder}")
             
             query_responder = BedrockLLM(system_instruction=system_prompt_query_responder)
 
             prompt_query_responder = create_prompt_query_responder(json.dumps(relevant_players_info, indent=4), query, replacement_required, players_to_be_replaced, replacement_players)
 
-            # print(f"prompt_query_responder : \n{prompt_query_responder}")
-
             final_response = query_responder.call(prompt=prompt_query_responder)
-
-            #print("final_response : ", final_response)
 
             return final_response, replacement_players
 

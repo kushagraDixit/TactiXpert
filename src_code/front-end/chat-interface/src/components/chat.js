@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import PlayerCard from './PlayerCard';
 import './chat.css';
-import DOMPurify from 'dompurify';
-import DelayedRender from './DelayedRender';
 import MarkdownToHtml from './MarkdownToHtml';
 
 const Chat = () => {
@@ -67,9 +65,6 @@ const Chat = () => {
           const request_calls = responseData['request_calls'];
           const team_store = responseData['team_store'];
 
-
-          //console.log("Final_team_combined", typeof(final_team_combined))
-
           agents.current = []; // Reset agents to avoid duplicates
           current_agents.current = current_team; // Update current_agents with the new current team
           current_team_store.current = team_store;
@@ -98,8 +93,7 @@ const Chat = () => {
             ]);
           });
 
-          // Update the team strength box only once
-          //console.log("TEam S: ", final_team_combined.team_strength)
+
           if (final_team_combined?.team_strength) {
             const teamStrengthId = `team-strength-${new Date().getTime()}`;
             setMessages((prevMessages) => [
@@ -125,9 +119,6 @@ const Chat = () => {
       } else if (requestType === 'other_request_type') {
         setLoading(true);
         try {
-          // Serialize current_agents and team_store to JSON strings
-          // const current_team_str = JSON.stringify(current_agents.current);
-          // const team_store_str = JSON.stringify(current_team_store.current);
 
           const response = await axios.post(
             `http://127.0.0.1:5000/request_team`,
@@ -187,7 +178,6 @@ const Chat = () => {
             error.response?.data?.message || error.message || 'Unknown error occurred.';
           setMessages((prevMessages) => [
             ...prevMessages,
-            // { sender: 'bot', text: `Error: ${errorMessage}`, id: `error-${new Date().getTime()}` }, // Unique ID for error messages
             { sender: 'bot', text: `Error Encountered During your query. Please Enter your Query Again!`, id: `error-${new Date().getTime()}` }, // Unique ID for error messages
           ]);
         }
@@ -213,10 +203,6 @@ const Chat = () => {
               />
             ) : msg.type === 'team_strength' || msg.type === 'query_response' ? (
               <div className="team-strength-box">
-                  {/* <div
-                    className="team-strength-content"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(MarkdownToHtml(msg.text)) }} // Sanitize the HTML
-                  /> */}
                   <MarkdownToHtml markdownText={msg.text} ></MarkdownToHtml>
               </div>
             ) : (

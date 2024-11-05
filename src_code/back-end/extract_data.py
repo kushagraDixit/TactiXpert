@@ -66,10 +66,10 @@ def get_player_options(player_request):
                 ScanIndexForward=False,
                 Limit=limit_per_query
             )
-            # Continue filtering players in Python
+            # Continue filtering players
             filtered_players.extend([player for player in response['Items'] if required_role in player['main_roles']])
 
-        # Return the first 10 filtered players (or fewer if less than 10 found)
+        # Return the first 10 filtered players
         return filtered_players[:10]
     
     except KeyError as e:
