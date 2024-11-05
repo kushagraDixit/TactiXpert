@@ -39,10 +39,11 @@ def request_team():
 
         body = json.loads(data_str)
 
-        request_str =       body.get('request')
-        request_type =      body.get('request_type')
-        team_info =         body.get('current_team', None)
-        team_full_info =    body.get('team_store', None)
+        request_str     =      body.get('request')
+        request_type    =      body.get('request_type')
+        team_info       =      body.get('current_team', None)
+        team_full_info  =      body.get('team_store', None)
+        request_calls   =      body.get('request_calls', None)
 
         # if request_str in cache:
         #     return jsonify(cache[request_str]), 200
@@ -53,14 +54,10 @@ def request_team():
             print("===============================Request End===================================")
             return jsonify({'Response': {'response_type' : request_type, 'final_team_combined' : final_team_combined, 'current_team' : current_team, 'team_store' : team_store, 'request_calls' : request_calls}}), 200
         if request_type=='other_request_type':
-            final_response = get_question_response(request_str, team_info, team_full_info)
+            final_response, replacement_players = get_question_response(request_str, team_info, team_full_info, request_calls)
             print("===============================Request End===================================")
-            return jsonify({'Response': {'response_type' : request_type, 'query_response' : final_response}}), 200
+            return jsonify({'Response': {'response_type' : request_type, 'query_response' : final_response, 'player_replacements' : replacement_players}}), 200
 
-
-        
-        
-        
     except (TypeError, ValueError):
         print("===============================Request End===================================")
         return jsonify({'error': 'Invalid input! Please provide request'}), 400

@@ -1,20 +1,10 @@
-# import google.generativeai as genai
-
-# def gemini_response(prompt, model):
-#     response = model.generate_content(prompt)
-#     return response.text
-
-# def getModel(system_prompt, key):
-#     genai.configure(api_key=key)
-#     return genai.GenerativeModel(
-#             model_name="gemini-1.5-flash",
-#             system_instruction=system_prompt)
-
 import re
 import json
 from decimal import Decimal
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 import re
+import pytz
+from datetime import datetime
 
 def replace_vct_game_changers(text):
     # Create a regex pattern to match "VCT Game Changers" in any case
@@ -116,7 +106,7 @@ def dynamodb_to_python_map(dynamodb_doc):
     deserializer = TypeDeserializer()
     
     def convert_value(value):
-        # Convert Decimal to float, process dicts and lists recursively
+        """Convert DynamoDB data types to Python-friendly types."""
         if isinstance(value, Decimal):
             return float(value)
         elif isinstance(value, dict):
@@ -133,7 +123,7 @@ def dynamodb_to_python_map(dynamodb_doc):
             # Use TypeDeserializer to handle these automatically
             if all(isinstance(v, dict) and len(v) == 1 and list(v.keys())[0] in ['S', 'N', 'BOOL', 'M', 'L'] for v in dynamodb_value.values()):
                 # If the document contains type specifiers, deserialize each field
-                return {k: deserializer.deserialize(v) for k, v in dynamodb_value.items()}
+                return {k: convert_value(deserializer.deserialize(v)) for k, v in dynamodb_value.items()}
             else:
                 # Otherwise, recursively process nested dictionaries
                 return {k: convert_value(v) for k, v in dynamodb_value.items()}
@@ -162,17 +152,23 @@ def transform_document(initial_doc):
         },
         "team_name": initial_doc.get("team_name"),
         "team_acronym": initial_doc.get("team_acronym"),
+        "is_igl": initial_doc.get("is_igl"),
         "all_time_score": initial_doc.get("all_time_score"),
+        "igl_score": initial_doc.get("igl_score"),
+        "acs": initial_doc.get("acs"),
         "kd": initial_doc.get("kd"),
-        "top_5_agents": initial_doc.get("top_5_agents"),
+        "kills_per_round": initial_doc.get("kills_per_round"),
+        "assists_per_round": initial_doc.get("assists_per_round"),
+        "first_kills_per_round": initial_doc.get("first_kills_per_round"),
+        "first_deaths_per_round": initial_doc.get("first_deaths_per_round"),
+        "headshot_percentage": initial_doc.get("headshot_percentage"),
+        "clutch_success_percentage": initial_doc.get("clutch_success_percentage"),
         "total_kills": initial_doc.get("total_kills"),
         "total_wins": initial_doc.get("total_wins"),
-        "last_15_stats": initial_doc.get("last_15_stats"),
-        "win_percentage": initial_doc.get("win_percentage"),
-        "is_igl": initial_doc.get("is_igl"),
         "total_games": initial_doc.get("total_games"),
-        "acs": initial_doc.get("acs"),
-        "igl_score": initial_doc.get("igl_score"),
+        "win_percentage": initial_doc.get("win_percentage"),
+        "top_5_agents": initial_doc.get("top_5_agents"),
+        "last_15_stats": initial_doc.get("last_15_stats"),
         "team_players": initial_doc.get("all_time_stats", {}).get("team_players"),
     }
 
@@ -204,3 +200,14 @@ def extract_json_for_final_response(json_string):
             except json.JSONDecodeError as e:
                 print(f"Error decoding JSON: {e}")
                 return None
+            
+def parse_date(date_string):
+    """Parse date strings and ensure all datetime objects are UTC-aware."""
+    try:
+        return datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=pytz.UTC)
+    except ValueError:
+        try:
+            return datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S%z")
+        except ValueError:
+            naive_datetime = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
+            return pytz.UTC.localize(naive_datetime)

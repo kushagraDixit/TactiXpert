@@ -79,6 +79,24 @@ const PlayerCard = (props) => {
             </div>
           </div>
 
+          <div className="row">
+            <div className="column left-align">
+              <p><strong>First Kills (Per Round):</strong> {player.first_kills_per_round}</p>
+            </div>
+            <div className="column right-align">
+              <p><strong>Assists (Per Round):</strong> {player.assists_per_round}</p>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="column left-align">
+              <p><strong>Headshot (%):</strong> {player.headshot_percentage}</p>
+            </div>
+            <div className="column right-align">
+              <p><strong>Clutch Success (%):</strong> {player.clutch_success_percentage}</p>
+            </div>
+          </div>
+
           {/* Dropdown button */}
           <button onClick={toggleDropdown} className="dropdown-btn">
             {isDropdownOpen ? 'Hide Details' : 'Show Details'}
@@ -88,11 +106,21 @@ const PlayerCard = (props) => {
 
       {/* Dropdown content (spans full width) */}
       {isDropdownOpen && (
-        <div className="dropdown-content">
-          <h4>Selection Reasoning</h4>
-          <p>{requestReasoning}</p>
-          <h4>Player Reasoning</h4>
-          <p>{playerReasoning}</p>
+       <div className="dropdown-content">
+          {/* Conditional Rendering Based on requestReasoning */}
+          {requestReasoning ? (
+              <>
+                  <h4>Selection Reasoning</h4>
+                  <p>{requestReasoning}</p>
+                  <h4>Player Reasoning</h4>
+                  <p>{playerReasoning}</p>
+              </>
+          ) : (
+              <>
+                  <h4>Replacement Reasoning</h4>
+                  <p>{playerReasoning}</p>
+              </>
+            )}
         </div>
       )}
     </div>

@@ -14,6 +14,7 @@ const Chat = () => {
   const agents = useRef([]); // Store the list of used agents here
   const current_agents = useRef([]); // Maintain the current agents list
   const current_team_store = useRef([]); // Maintain the team store
+  const current_request_store = useRef([]); // Maintain the team store
 
   const get_request_type = (request) => {
     if (request.toLowerCase().includes('build') || request.toLowerCase().includes('create')) {
@@ -67,14 +68,15 @@ const Chat = () => {
           const team_store = responseData['team_store'];
 
 
-          console.log("Final_team_combined", typeof(final_team_combined))
+          //console.log("Final_team_combined", typeof(final_team_combined))
 
           agents.current = []; // Reset agents to avoid duplicates
           current_agents.current = current_team; // Update current_agents with the new current team
           current_team_store.current = team_store;
+          current_request_store.current = request_calls
           
           
-          console.log("Current Team: ", current_team)
+          //console.log("Current Team: ", current_team)
           
           // Add each player's data to messages with unique keys
           current_team.forEach((player, i) => {
@@ -97,7 +99,7 @@ const Chat = () => {
           });
 
           // Update the team strength box only once
-          console.log("TEam S: ", final_team_combined.team_strength)
+          //console.log("TEam S: ", final_team_combined.team_strength)
           if (final_team_combined?.team_strength) {
             const teamStrengthId = `team-strength-${new Date().getTime()}`;
             setMessages((prevMessages) => [
@@ -134,6 +136,7 @@ const Chat = () => {
               request_type: requestType,
               current_team: current_agents.current,
               team_store: current_team_store.current,
+              request_calls: current_request_store.current
             },
             {
               headers: {
@@ -144,6 +147,30 @@ const Chat = () => {
 
           const responseData = response.data['Response'];
           const queryResponse = responseData['query_response'];
+          const player_replacements = responseData['player_replacements']
+
+          console.log("Player Replacements: ", player_replacements)
+
+          // Check if player_replacements is not empty
+          if (player_replacements && player_replacements.length > 0) {
+            agents.current = []; // Reset agents to avoid duplicates
+            
+            // Loop through player_replacements to add their cards
+            player_replacements.forEach((player, i) => {
+              const agentImage = getAgentImage(player.top_5_agents);
+
+              setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  sender: 'bot',
+                  player,
+                  agentImage,
+                  playerReasoning: player.reasoning || 'No reasoning available',
+                  id: `${player.player_id}-${new Date().getTime()}`, // Unique key for each replacement player message
+                },
+              ]);
+            });
+          }
 
           // Add the query_response to the chat
           setMessages((prevMessages) => [

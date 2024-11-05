@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "react-scripts start",
-    "start-flask": "cd ../back-end flask run",
-    "dev": "concurrently \"cd ./chat-interface/ && npm run start\" \"npm run start-flask\""
+    "start-flask": "cd ../back-end && conda activate vct_hack && flask run",
+    "dev": "concurrently \"cd ./chat-interface/ && npm run start\""
   },
   "dependencies": {
     "concurrently": "^6.0.0",  
