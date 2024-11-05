@@ -54,4 +54,4 @@ The React app server will start on **port 3000**.
 
 Once both servers are running, you can access the chat interface at `http://localhost:3000`.
 
-Enjoy using the chat interface for your project!
+Enjoy using the chat interface!
