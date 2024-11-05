@@ -11,8 +11,7 @@ import json
 def get_selected_player(input_map, player_request, task):
     
     system_prompt_player_selector = create_prompt_player_selection(task)
-    player_selector = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_prompt_player_selector)
-    # player_selector = BedrockLLM(system_instruction=system_prompt_player_selector)
+    player_selector = BedrockLLM(system_instruction=system_prompt_player_selector)
 
     current_state_for_selection = create_prompt_selection_state(input_map['current_team'], player_request, input_map['player_options'])
 
@@ -30,8 +29,7 @@ def generate_team(request):
     try:
         # Initialize the model
         system_instruction = create_system_prompt_team_generator()
-        team_planner = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_instruction)
-        # team_planner = BedrockLLM(system_instruction=system_instruction)
+        team_planner = BedrockLLM(system_instruction=system_instruction)
         request_calls = []
         current_team = []
         current_team_store = []
@@ -175,8 +173,7 @@ def get_replacement_players(players_to_be_replaced, replacement_request_calls, q
         while not success and retries > 0:
             try:
                 system_prompt_replacement_selector = create_system_prompt_replacement_selector(query)
-                replacement_selector = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_prompt_replacement_selector)
-                # replacement_selector = BedrockLLM(system_instruction=system_prompt_replacement_selector)
+                replacement_selector = BedrockLLM(system_instruction=system_prompt_replacement_selector)
 
                 player_options = get_player_options(player_request)
 
@@ -237,8 +234,7 @@ def get_question_response(request, current_team, current_team_store, request_cal
             
             system_prompt_relevant_players = create_system_prompt_find_relevant_players()
             
-            relevent_players_finder = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_prompt_relevant_players)
-            # relevent_players_finder = BedrockLLM(system_instruction=system_prompt_relevant_players)
+            relevent_players_finder = BedrockLLM(system_instruction=system_prompt_relevant_players)
 
             relevent_players_prompt = create_relevant_players_prompt(json.dumps(current_team, indent=4), query)
 
@@ -272,7 +268,6 @@ def get_question_response(request, current_team, current_team_store, request_cal
 
             # print(f"system_prompt_query_responder : \n{system_prompt_query_responder}")
             
-            # query_responder = GeminiLLM(api_key=Config.GEMINI_KEY, system_instruction=system_prompt_query_responder)
             query_responder = BedrockLLM(system_instruction=system_prompt_query_responder)
 
             prompt_query_responder = create_prompt_query_responder(json.dumps(relevant_players_info, indent=4), query, replacement_required, players_to_be_replaced, replacement_players)
