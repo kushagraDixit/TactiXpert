@@ -8,20 +8,20 @@ def create_system_prompt_team_generator():
 1. **Dynamic Strategy Based on Player Information**:
 - Build an optimal strategy according to you which should give you the best team such that all bases are covered.
 - After each player is selected, analyze their detailed information, including:
-- `player_type` (VCT-International, VCT-Challengers, Game-Changers)
-- `main_roles` (e.g., Duelist, Controller)
+- `player_type` (Only Allowed: vct-international, vct-challengers, game-changers)
+- `main_roles` (Only Allowed: Duelist, Controller, Sentinel, Initiator)
 - `player_region` (e.g., NA, EU)
 
 2. **Player Request Constraints**:
-- **`required_role`**: Must be one of **Duelist, Initiator, Controller, or Sentinel**
-- **`competitive_level`**: Must be one of **"vct-international", "vct-challengers", or "game-changers"**
+- **`required_role`**: **Must be one of Duelist, Initiator, Controller, or Sentinel**
+- **`competitive_level`**: **Must be one of "vct-international", "vct-challengers", or "game-changers"**
 - **League Preference**: Always prioritize players from higher leagues (vct-international > vct-challengers > game-changers (Females)), unless strict team constraints prevent this.
 - **Include Instruction in Reasoning**: Ensure that the specific instructions are clearly reflected in the `reasoning` for each player selection.
 - Example request:
 ```json
 {
 "required_role": "Controller",
-"competitive_level": "vct-challengers",
+"competitive_level": "vct-international",
 "is_igl_required": false,
 "requirement": "Prioritize a Controller with strong smoke utility.",
 "reasoning": "The team needs a Controller to provide better map control and synergy with the Duelists, fulfilling the team's requirement for utility."
@@ -33,8 +33,9 @@ def create_system_prompt_team_generator():
 - **Role Flexibility**: If current picks are versatile, prioritize more specialized players in future.
 - **Player Performance**: Use metrics like `acs`, `kd`, `win_percentage` to ensure a balance between utility and fragging power.
 - **IGL Leadership**: Maintain a strong in-game leader presence using `is_igl` and `igl_score`.
-- **Region and Synergy**: Focus on building synergy within the team. 
-- **Regional Diversity Requirement**: If the team requires regional diversity, prioritize building a core with **VCT-International** players and complement it with selections from **VCT-Challengers** to enhance variety across regions.
+- **Synergy**: Focus on building synergy within the team. 
+- **Regional Diversity Requirement**: If the user ask for regional diversity, prioritize building a core with 2 vct-international players and complement it with selections from vct-challengers to enhance variety across regions.
+- **Underrepresented Groups**: If user ask to include players from underrepresented group or for mixed gender representation, prioritize building a core with 3 vct-international players and complement it with selections from game-changers.
 
 4. **Reassess Team Needs After Every Pick**:
 - Adjust the strategy after each selection. For instance, if the team already has strong defense, the next pick should focus on offense or map versatility.
@@ -50,6 +51,7 @@ def create_system_prompt_team_generator():
 "reasoning": "The team currently has strong defense, so adding a high-fragging Duelist will strengthen offensive capability, ensuring a balanced team."
 }
 ```
+-**'required_role' key can only contain a single role**. if you need a player to be flexible then add the additional roles required in the 'requirement' description.
 
 6. **Final Team Strength Summary**:
 - Once the team is complete (5 players), provide a comprehensive "Team Strength Summary" that reflects why each player was chosen based on the instructions and strategy. The summary should explain the balance of roles, agents, and synergies, tying each player choice to the overall team strategy.
@@ -126,7 +128,6 @@ Instruction:
 {instruction}
 
 Make sure to provide a thorough breakdown that aligns with the instructions given, offering a complete rationale for the team's final composition and answer all explanations asked in the instructions in a detailed manner. **The response should be properly styled in Markdown format**.'''
-
 
 def create_prompt_selection_state(current_team, player_request, player_options):
     return f'''Current Team : 
@@ -207,7 +208,7 @@ Current_team:
 '''
 
 def create_system_prompt_query_responder(replacement_required):
-    
+
     replacement_prompt = ""
     if replacement_required:
         replacement_prompt = "\n\n**Note**: If the user’s task is to find a suitable replacement for a specific player. You are provided with a replacement player selected for this role in the team. Based on the information available about the current team and the newly added replacement player, construct a response that thoroughly addresses any query the user has posed regarding this replacement or the team composition.\n"
@@ -238,13 +239,13 @@ def create_system_prompt_query_responder(replacement_required):
 
 
 def create_prompt_query_responder(filtered_players_info, query, replacement_required, players_to_be_replaced, replacement_players):
-    
+
     replacement_prompt = ""
     if replacement_required:
         replacement_prompt = "\n\n"
         for i, player_to_be_replaced in enumerate(players_to_be_replaced):
             replacement_prompt += f"Replacement for {player_to_be_replaced['player_handle']} : " + json.dumps(replacement_players[i])  + "\n\n"
-    
+
     return f'''Relevant Players:
 {filtered_players_info}{replacement_prompt}
 
